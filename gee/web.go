@@ -8,16 +8,20 @@ import (
 type HandleFunc func(ctx *Context)
 
 type Web struct{
-	router map[string]HandleFunc
+	routes router
 }
 
 func NewRouter() *Web{
-	return &Web{router: make(map[string]HandleFunc)}
+	return &Web{
+		routes: router{
+			head: &node{},
+			handlers: make(map[string]HandleFunc),
+		},
+	}
 }
 
 func (web *Web) addRoute(method string, path string, handler HandleFunc){
-	key := method + ":" + path
-	web.router[key] = handler
+	web.routes.add(method, path, handler)
 }
 
 func (web *Web) GET(path string, handler HandleFunc){
@@ -29,9 +33,9 @@ func (web *Web) POST(path string, handler HandleFunc){
 }
 
 func (web *Web) ServeHTTP(res http.ResponseWriter, req *http.Request){
-	key := req.Method + ":" + req.URL.Path
-	if handler, ok := web.router[key]; ok {
-		handler(newContext(req, res))
+	handler, params := web.routes.get(req.Method, req.URL.Path)
+	if nil != handler {
+		handler(newContext(req, res, params))
 	} else {
 		fmt.Fprintf(res, "404 Not Found: %s\n", req.URL)
 	}

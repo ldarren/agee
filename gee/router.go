@@ -33,16 +33,15 @@ func splitPattern(pattern string) []string {
 	return parts
 }
 
-func (r *router) Add(method string, pattern string, handler HandleFunc) {
+func (r *router) add(method string, pattern string, handler HandleFunc) {
 	head := r.head
-
 	parts := splitPattern(pattern)
 	head.insert(pattern, parts, 0)
 
 	r.handlers[method + "-" + pattern] = handler
 }
 
-func (r *router) Get(method string, path string) (HandleFunc, map[string]string) {
+func (r *router) get(method string, path string) (HandleFunc, map[string]string) {
 	head := r.head
 	if nil == head {
 		return nil, nil
