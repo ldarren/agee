@@ -10,6 +10,7 @@ func main() {
 	router := gee.NewRouter()
 	router.GET("/", handleRoot)
 	router.GET("/trigger", handleTrigger)
+	router.GET("/:name", handleParams)
 	log.Fatal(router.Start(":8080"))
 }
 
@@ -27,4 +28,10 @@ func handleTrigger(ctx *gee.Context) {
 		//fmt.Fprintf(res, "Key[%q] [%q]\n", k, v)
 	}
 	ctx.JSON(200, obj)
+}
+
+func handleParams(ctx *gee.Context) {
+	ctx.JSON(200, gee.Object{
+		"name": ctx.GetParamValue("name"),
+	})
 }

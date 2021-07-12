@@ -1,7 +1,12 @@
 # agee
 A Gee Imitation
 
-## Test
+## run
+```
+go run main.go
+```
+
+## test
 ```
 go test -v gee/
 ```
