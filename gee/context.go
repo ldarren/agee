@@ -1,19 +1,19 @@
 package gee
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 )
 
 type Object map[string]interface{}
 
-type Context struct{
-	Req *http.Request
-	Res http.ResponseWriter
+type Context struct {
+	Req    *http.Request
+	Res    http.ResponseWriter
 	Params map[string]string
 }
 
-func newContext(req *http.Request, res http.ResponseWriter, params map[string]string) *Context{
+func newContext(req *http.Request, res http.ResponseWriter, params map[string]string) *Context {
 	return &Context{Req: req, Res: res, Params: params}
 }
 
@@ -30,15 +30,15 @@ func (ctx *Context) GetParamValue(key string) string {
 	return val
 }
 
-func (ctx *Context) SetHeader(key string, val string){
+func (ctx *Context) SetHeader(key string, val string) {
 	ctx.Res.Header().Set(key, val)
 }
 
-func (ctx *Context) SetStatus(code int){
+func (ctx *Context) SetStatus(code int) {
 	ctx.Res.WriteHeader(code)
 }
 
-func (ctx *Context) JSON(code int, obj interface{}){
+func (ctx *Context) JSON(code int, obj interface{}) {
 	ctx.SetHeader("Context-Type", "application/json")
 	ctx.SetStatus(code)
 	encoder := json.NewEncoder(ctx.Res)

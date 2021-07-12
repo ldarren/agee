@@ -1,9 +1,9 @@
 package gee
 
 import (
-	"testing"
+	"fmt"
 	"reflect"
-//	"fmt"
+	"testing"
 )
 
 func TestSplitPattern(t *testing.T) {
@@ -21,7 +21,7 @@ func TestGetRoute(t *testing.T) {
 	r := newRouter()
 	r.add("GET", "/", nil)
 	r.add("GET", "/hello/:name", nil)
-/*	r.add("GET", "/hello/b/c", nil)
+	r.add("GET", "/hello/b/c", nil)
 	r.add("GET", "/hi/:name", nil)
 	r.add("GET", "/assets/*filepath", nil)
 
@@ -35,5 +35,5 @@ func TestGetRoute(t *testing.T) {
 		t.Fatal("name should be equal to 'geektutu'")
 	}
 
-	fmt.Printf("matched , params['name']: %s\n", ps["name"])*/
+	fmt.Printf("matched , params['name']: %s\n", ps["name"])
 }

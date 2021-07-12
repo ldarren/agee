@@ -7,32 +7,29 @@ import (
 
 type HandleFunc func(ctx *Context)
 
-type Web struct{
-	routes router
+type Web struct {
+	routes *router
 }
 
-func NewRouter() *Web{
+func NewRouter() *Web {
 	return &Web{
-		routes: router{
-			head: &node{},
-			handlers: make(map[string]HandleFunc),
-		},
+		routes: newRouter(),
 	}
 }
 
-func (web *Web) addRoute(method string, path string, handler HandleFunc){
+func (web *Web) addRoute(method string, path string, handler HandleFunc) {
 	web.routes.add(method, path, handler)
 }
 
-func (web *Web) GET(path string, handler HandleFunc){
-	web.addRoute("GET",  path, handler)
+func (web *Web) GET(path string, handler HandleFunc) {
+	web.addRoute("GET", path, handler)
 }
 
-func (web *Web) POST(path string, handler HandleFunc){
-	web.addRoute("POST",  path, handler)
+func (web *Web) POST(path string, handler HandleFunc) {
+	web.addRoute("POST", path, handler)
 }
 
-func (web *Web) ServeHTTP(res http.ResponseWriter, req *http.Request){
+func (web *Web) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	handler, params := web.routes.get(req.Method, req.URL.Path)
 	if nil != handler {
 		handler(newContext(req, res, params))
@@ -41,6 +38,6 @@ func (web *Web) ServeHTTP(res http.ResponseWriter, req *http.Request){
 	}
 }
 
-func (web *Web) Start(port string) (err error){
+func (web *Web) Start(port string) (err error) {
 	return http.ListenAndServe(port, web)
 }

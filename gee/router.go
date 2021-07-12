@@ -5,13 +5,13 @@ import (
 )
 
 type router struct {
-	head *node
+	head     *node
 	handlers map[string]HandleFunc
 }
 
-func newRouter() (*router) {
+func newRouter() *router {
 	return &router{
-		head: &node{},
+		head:     newNode(""),
 		handlers: make(map[string]HandleFunc),
 	}
 }
@@ -26,7 +26,7 @@ func splitPattern(pattern string) []string {
 			continue
 		}
 		parts = append(parts, part)
-		if '*' == part[0]{
+		if '*' == part[0] {
 			break
 		}
 	}
@@ -34,11 +34,11 @@ func splitPattern(pattern string) []string {
 }
 
 func (r *router) add(method string, pattern string, handler HandleFunc) {
-	head := r.head
 	parts := splitPattern(pattern)
+	head := r.head
 	head.insert(pattern, parts, 0)
 
-	r.handlers[method + "-" + pattern] = handler
+	r.handlers[method+"-"+pattern] = handler
 }
 
 func (r *router) get(method string, path string) (HandleFunc, map[string]string) {
@@ -66,6 +66,6 @@ func (r *router) get(method string, path string) (HandleFunc, map[string]string)
 		}
 	}
 
-	handler := r.handlers[method + "-" + n.pattern]
+	handler := r.handlers[method+"-"+n.pattern]
 	return handler, params
 }

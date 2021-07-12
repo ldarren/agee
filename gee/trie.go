@@ -1,14 +1,26 @@
 package gee
 
+import (
+	"strings"
+)
+
 type node struct {
-	pattern string
-	part string
-	isWild bool
+	pattern  string
+	part     string
+	isWild   bool
 	children []*node
 }
 
-func (n *node) matchChild(part string) (*node) {
-	var wild *node
+func newNode(part string) *node {
+	return &node{
+		part:     part,
+		isWild:   strings.HasPrefix(part, ":") || strings.HasPrefix(part, "*"),
+		children: make([]*node, 0),
+	}
+}
+
+func (n *node) matchChild(part string) *node {
+	var wild *node = nil
 	for _, child := range n.children {
 		if child.part == part {
 			return child
@@ -29,13 +41,13 @@ func (n *node) insert(pattern string, parts []string, i int) {
 	part := parts[i]
 	child := n.matchChild(part)
 	if nil == child {
-		c := part[0]
-		n.children = append(n.children, &node{part: part, isWild: ':' == c || '*' == c, children: make([]*node, 0)})
+		child = newNode(part)
+		n.children = append(n.children, child)
 	}
 	child.insert(pattern, parts, i+1)
 }
 
-func (n *node) search(parts []string, i int) (*node) {
+func (n *node) search(parts []string, i int) *node {
 	if len(parts) == i {
 		return n
 	}
