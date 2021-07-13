@@ -8,29 +8,17 @@ import (
 type HandleFunc func(ctx *Context)
 
 type Web struct {
-	routes *router
+	router *router
 }
 
-func NewRouter() *Web {
+func NewWeb() *Web {
 	return &Web{
-		routes: newRouter(),
+		router: newRouter(),
 	}
 }
 
-func (web *Web) addRoute(method string, path string, handler HandleFunc) {
-	web.routes.add(method, path, handler)
-}
-
-func (web *Web) GET(path string, handler HandleFunc) {
-	web.addRoute("GET", path, handler)
-}
-
-func (web *Web) POST(path string, handler HandleFunc) {
-	web.addRoute("POST", path, handler)
-}
-
 func (web *Web) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	handler, params := web.routes.get(req.Method, req.URL.Path)
+	handler, params := web.router.get(req.Method, req.URL.Path)
 	if nil != handler {
 		handler(newContext(req, res, params))
 	} else {

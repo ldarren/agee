@@ -7,11 +7,12 @@ import (
 )
 
 func main() {
-	router := gee.NewRouter()
-	router.GET("/", handleRoot)
-	router.GET("/trigger", handleTrigger)
-	router.GET("/:name", handleParams)
-	log.Fatal(router.Start(":8080"))
+	web := gee.NewWeb()
+	v1 := gee.NewRouterGroup(web, "/v1")
+	v1.GET("/", handleRoot)
+	v1.GET("/trigger", handleTrigger)
+	v1.GET("/:name", handleParams)
+	log.Fatal(web.Start(":8080"))
 }
 
 func handleRoot(ctx *gee.Context) {
