@@ -4,12 +4,36 @@ import (
 	//"fmt"
 	"gee"
 	"log"
+	"time"
 )
+
+func Logger() gee.HandleFunc {
+	return func(c *gee.Context) {
+		// Start timer
+		t := time.Now()
+		// Process request
+		c.Next()
+		// Calculate resolution time
+		log.Printf("%s in %v", c.Req.RequestURI, time.Since(t))
+	}
+}
+
+func onlyForV2() gee.HandleFunc {
+	return func(c *gee.Context) {
+		// Start timer
+		t := time.Now()
+		c.Next()
+		// Calculate resolution time
+		log.Printf("%s in %v for group v2", c.Req.RequestURI, time.Since(t))
+	}
+}
 
 func main() {
 	web := gee.NewWeb()
-	v1 := gee.NewRouterGroup(web, "/v1")
-	v1.GET("/", handleRoot)
+	web.Use(Logger())
+	web.GET("/", handleRoot)
+	v1 := gee.NewGroup(web.Pipeline, "/v1")
+	v1.Use(onlyForV2())
 	v1.GET("/trigger", handleTrigger)
 	v1.GET("/:name", handleParams)
 	log.Fatal(web.Start(":8080"))

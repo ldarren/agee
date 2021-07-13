@@ -11,10 +11,18 @@ type Context struct {
 	Req    *http.Request
 	Res    http.ResponseWriter
 	Params map[string]string
+	handlers []HandleFunc
+	index int
 }
 
-func newContext(req *http.Request, res http.ResponseWriter, params map[string]string) *Context {
-	return &Context{Req: req, Res: res, Params: params}
+func newContext(req *http.Request, res http.ResponseWriter, params map[string]string, handlers []HandleFunc) *Context {
+	return &Context{
+		Req: req,
+		Res: res,
+		Params: params,
+		handlers: handlers,
+		index: -1,
+	}
 }
 
 func (ctx *Context) GetFormValue(key string) string {
@@ -44,5 +52,20 @@ func (ctx *Context) JSON(code int, obj interface{}) {
 	encoder := json.NewEncoder(ctx.Res)
 	if err := encoder.Encode(obj); err != nil {
 		http.Error(ctx.Res, err.Error(), 500)
+	}
+}
+
+func (ctx *Context) Fail(code int, err string) {
+	ctx.index = len(ctx.handlers)
+	ctx.JSON(code, Object{"message": err})
+}
+
+func (ctx *Context) Next() {
+	ctx.index++
+
+	max := len(ctx.handlers)
+
+	for ; ctx.index < max; ctx.index++ {
+		ctx.handlers[ctx.index](ctx)
 	}
 }
