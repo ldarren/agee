@@ -57,6 +57,7 @@ func (ctx *Context) JSON(code int, obj interface{}) {
 
 func (ctx *Context) Fail(code int, err string) {
 	ctx.index = len(ctx.handlers)
+	ctx.SetStatus(code)
 	ctx.JSON(code, Object{"message": err})
 }
 

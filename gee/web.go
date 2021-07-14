@@ -28,8 +28,8 @@ func (web *Web) SetupFileSvrHandler(p *Pipeline, prefix string, local string) Ha
 
 	return func (ctx *Context) {
 		fpath := ctx.GetParamValue("fpath")
-		if _, err := os.Stat(fpath); nil != err {
-			ctx.SetStatus(http.StatusNotFound)
+		if _, err := os.Stat(path.Join(local, fpath)); nil != err {
+			ctx.Fail(http.StatusNotFound, err.Error())
 			return
 		}
 
