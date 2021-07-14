@@ -36,6 +36,7 @@ func main() {
 	v1.Use(onlyForV2())
 	v1.GET("/trigger", handleTrigger)
 	v1.GET("/:name", handleParams)
+	v1.Static("/log", web.SetupFileSvrHandler(v1, "/log", "./pub"))
 	log.Fatal(web.Start(":8080"))
 }
 

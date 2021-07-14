@@ -2,6 +2,7 @@ package gee
 
 import (
 	"strings"
+	"path"
 )
 
 type HandleFunc func(ctx *Context)
@@ -28,25 +29,29 @@ func (p *Pipeline) Use(middlewares ...HandleFunc) {
 	p.middlewares = append(p.middlewares, middlewares...)
 }
 
-func (p *Pipeline) getMiddlewares(path string, children []*Pipeline, middlewares []HandleFunc) {
+func (p *Pipeline) getMiddlewares(url string, children []*Pipeline, middlewares []HandleFunc) {
 	for _, child := range children {
-		if strings.HasPrefix(path, child.prefix) {
+		if strings.HasPrefix(url, child.prefix) {
 			middlewares = append(middlewares, child.middlewares...)
-			child.getMiddlewares(path, child.children, middlewares)
+			child.getMiddlewares(url, child.children, middlewares)
 			return
 		}
 	}
 	return
 }
 
-func (p *Pipeline) addRoute(method string, path string, handler HandleFunc) {
-	p.router.add(method, p.prefix + path, handler)
+func (p *Pipeline) addRoute(method string, url string, handler HandleFunc) {
+	p.router.add(method, path.Join(p.prefix, url), handler)
 }
 
-func (p *Pipeline) GET(path string, handler HandleFunc) {
-	p.addRoute("GET", path, handler)
+func (p *Pipeline) GET(url string, handler HandleFunc) {
+	p.addRoute("GET", url, handler)
 }
 
-func (p *Pipeline) POST(path string, handler HandleFunc) {
-	p.addRoute("POST", path, handler)
+func (p *Pipeline) POST(url string, handler HandleFunc) {
+	p.addRoute("POST", url, handler)
+}
+
+func (p *Pipeline) Static(prefix string, handler HandleFunc) {
+	p.addRoute("GET", path.Join(prefix, "*fpath"), handler)
 }
