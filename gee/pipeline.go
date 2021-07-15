@@ -29,15 +29,14 @@ func (p *Pipeline) Use(middlewares ...HandleFunc) {
 	p.middlewares = append(p.middlewares, middlewares...)
 }
 
-func (p *Pipeline) getMiddlewares(url string, children []*Pipeline, middlewares []HandleFunc) {
+func (p *Pipeline) getMiddlewares(url string, children []*Pipeline, middlewares []HandleFunc) string {
 	for _, child := range children {
 		if strings.HasPrefix(url, child.prefix) {
 			middlewares = append(middlewares, child.middlewares...)
-			child.getMiddlewares(url, child.children, middlewares)
-			return
+			return child.getMiddlewares(url, child.children, middlewares)
 		}
 	}
-	return
+	return p.prefix
 }
 
 func (p *Pipeline) addRoute(method string, url string, handler HandleFunc) {
@@ -50,8 +49,4 @@ func (p *Pipeline) GET(url string, handler HandleFunc) {
 
 func (p *Pipeline) POST(url string, handler HandleFunc) {
 	p.addRoute("POST", url, handler)
-}
-
-func (p *Pipeline) Static(prefix string, handler HandleFunc) {
-	p.addRoute("GET", path.Join(prefix, "*fpath"), handler)
 }

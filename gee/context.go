@@ -10,15 +10,22 @@ type Object map[string]interface{}
 type Context struct {
 	Req    *http.Request
 	Res    http.ResponseWriter
+	prefix string
 	Params map[string]string
 	handlers []HandleFunc
 	index int
 }
 
-func newContext(req *http.Request, res http.ResponseWriter, params map[string]string, handlers []HandleFunc) *Context {
+func newContext(
+	req *http.Request,
+	res http.ResponseWriter,
+	prefix string,
+	params map[string]string,
+	handlers []HandleFunc) *Context {
 	return &Context{
 		Req: req,
 		Res: res,
+		prefix: prefix,
 		Params: params,
 		handlers: handlers,
 		index: -1,

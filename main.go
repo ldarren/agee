@@ -1,63 +1,50 @@
 package main
 
 import (
-	//"fmt"
+	"fmt"
 	"gee"
 	"log"
 	"time"
 )
 
-func Logger() gee.HandleFunc {
-	return func(c *gee.Context) {
-		// Start timer
-		t := time.Now()
-		// Process request
-		c.Next()
-		// Calculate resolution time
-		log.Printf("%s in %v", c.Req.RequestURI, time.Since(t))
-	}
+func FormatAsDate(t time.Time) string {
+	year, month, day := t.Date()
+	return fmt.Sprintf("%d-%02d-%02d", year, month, day)
 }
 
-func onlyForV2() gee.HandleFunc {
-	return func(c *gee.Context) {
-		// Start timer
-		t := time.Now()
-		c.Next()
-		// Calculate resolution time
-		log.Printf("%s in %v for group v2", c.Req.RequestURI, time.Since(t))
-	}
+type student struct {
+	Name   string
+	Age    int8
+	Joined time.Time
 }
 
 func main() {
 	web := gee.NewWeb()
-	web.Use(Logger())
-	web.GET("/", handleRoot)
+	web.Use(recovery())
+	web.Use(logger())
+
+	stu1 := &student{Name: "Geektutu", Age: 20, Joined: time.Date(2021, 7, 17, 0, 0, 0, 0, time.UTC)}
+	stu2 := &student{Name: "Jack", Age: 22, Joined: time.Date(2021, 7, 19, 0, 0, 0, 0, time.UTC)}
+
+	web.SetupTemplateEngine("tmpl/*", FormatAsDate)
+	web.GET("/*url", web.HTML("index.tmpl", gee.Object{
+		"title":  "Agee",
+		"stuArr": [2]*student{stu1, stu2},
+	}))
+
 	v1 := gee.NewGroup(web.Pipeline, "/v1")
-	v1.Use(onlyForV2())
+	v1.Use(auth())
 	v1.GET("/trigger", handleTrigger)
+	v1.GET("/panic", func(ctx *gee.Context) {
+		names := []int{1}
+		ctx.JSON(200, gee.Object{
+			"name": names[100],
+		})
+	})
 	v1.GET("/:name", handleParams)
-	v1.Static("/log", web.SetupFileSvrHandler(v1, "/log", "./pub"))
+
+	assets := gee.NewGroup(web.Pipeline, "/assets")
+	assets.GET("/*fpath", web.SetupFileSvrHandler("fpath", "./pub/upd"))
+
 	log.Fatal(web.Start(":8080"))
-}
-
-func handleRoot(ctx *gee.Context) {
-	ctx.JSON(200, gee.Object{
-		"path": ctx.Req.URL.Path,
-	})
-	//fmt.Fprintf(res, "From %q\n", ctx.Req.URL.Path)
-}
-
-func handleTrigger(ctx *gee.Context) {
-	obj := make(gee.Object)
-	for k, v := range ctx.Req.Header {
-		obj[k] = v
-		//fmt.Fprintf(res, "Key[%q] [%q]\n", k, v)
-	}
-	ctx.JSON(200, obj)
-}
-
-func handleParams(ctx *gee.Context) {
-	ctx.JSON(200, gee.Object{
-		"name": ctx.GetParamValue("name"),
-	})
 }
